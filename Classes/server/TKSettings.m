@@ -10,6 +10,8 @@
 
 #import "TKTripKit.h"
 
+#import "AKUser.h"
+
 @implementation TKSettings
 
 + (NSMutableDictionary *)defaultDictionary
@@ -56,7 +58,11 @@
   }
   [paras setValue:@([sharedDefaults integerForKey:TKDefaultsKeyProfileTransportWalkSpeed])		forKey:@"ws"];
   [paras setValue:[sharedDefaults objectForKey:TKDefaultsKeyProfileTransportWalkMaxDuration]  forKey:@"wm"]; // optional
-  [paras setValue:@([sharedDefaults integerForKey:TKDefaultsKeyProfileTransportTransferTime]) forKey:@"tt"];
+
+  NSNumber *transferTime = [[AKUser currentUser] transferTime];
+  if (transferTime) {
+    [paras setValue:transferTime forKey:@"tt"];
+  }
   
   // beta features
   if ([sharedDefaults boolForKey:SVKDefaultsKeyProfileEnableFlights]) {
@@ -84,7 +90,8 @@
 + (void)setMinimumTransferDuration:(NSTimeInterval)duration
 {
   NSInteger minutes = (NSInteger) ((duration + 59) / 60);
-  [[NSUserDefaults sharedDefaults] setInteger:minutes forKey:TKDefaultsKeyProfileTransportTransferTime];
+  [[AKUser currentUser] setTransferTime:@(minutes)];
+  [[AKUser currentUser] saveInBackground]; // TODO: eventually should be fine
 }
 
 + (void)setProfileWeight:(float)weight forComponent:(TKSettingsProfileWeight)component
