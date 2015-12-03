@@ -56,13 +56,11 @@
   if ([sharedDefaults boolForKey:TKDefaultsKeyProfileTransportConcessionPricing]) {
     [paras setValue:@(YES) forKey:@"conc"];
   }
-  [paras setValue:@([sharedDefaults integerForKey:TKDefaultsKeyProfileTransportWalkSpeed])		forKey:@"ws"];
-  [paras setValue:[sharedDefaults objectForKey:TKDefaultsKeyProfileTransportWalkMaxDuration]  forKey:@"wm"]; // optional
 
-  NSNumber *transferTime = [[AKUser currentUser] transferTime];
-  if (transferTime) {
-    [paras setValue:transferTime forKey:@"tt"];
-  }
+  [paras setValue:[[AKUser currentUser] cyclingSpeed] forKey:@"cs"];
+  [paras setValue:[[AKUser currentUser] walkingSpeed] forKey:@"ws"];
+  [paras setValue:[[AKUser currentUser] walkingMaxDuration] forKey:@"wm"];
+  [paras setValue:[[AKUser currentUser] transferTime] forKey:@"tt"];
   
   // beta features
   if ([sharedDefaults boolForKey:SVKDefaultsKeyProfileEnableFlights]) {
@@ -84,14 +82,15 @@
 + (void)setMaximumWalkingDuration:(NSTimeInterval)duration
 {
   NSInteger minutes = (NSInteger) ((duration + 59) / 60);
-  [[NSUserDefaults sharedDefaults] setDouble:minutes forKey:TKDefaultsKeyProfileTransportWalkMaxDuration];
+  [[AKUser currentUser] setWalkingMaxDuration:@(minutes)];
+  [[AKUser currentUser] saveEventually];
 }
 
 + (void)setMinimumTransferDuration:(NSTimeInterval)duration
 {
   NSInteger minutes = (NSInteger) ((duration + 59) / 60);
   [[AKUser currentUser] setTransferTime:@(minutes)];
-  [[AKUser currentUser] saveInBackground]; // TODO: eventually should be fine
+  [[AKUser currentUser] saveEventually];
 }
 
 + (void)setProfileWeight:(float)weight forComponent:(TKSettingsProfileWeight)component
@@ -117,12 +116,14 @@
 
 + (void)setWalkingSpeed:(TKSettingsSpeed)speed
 {
-  [[NSUserDefaults sharedDefaults] setInteger:(NSInteger)speed forKey:TKDefaultsKeyProfileTransportWalkSpeed];
+  [[AKUser currentUser] setWalkingSpeed:@(speed)];
+  [[AKUser currentUser] saveEventually];
 }
 
 + (void)setCyclingSpeed:(TKSettingsSpeed)speed
 {
-  [[NSUserDefaults sharedDefaults] setInteger:(NSInteger)speed forKey:TKDefaultsKeyProfileTransportCyclingSpeed];
+  [[AKUser currentUser] setCyclingSpeed:@(speed)];
+  [[AKUser currentUser] saveEventually];
 }
 
 @end
