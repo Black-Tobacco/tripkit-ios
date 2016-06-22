@@ -500,7 +500,7 @@ allowDuplicatingExistingTrip:YES]; // we don't actually create a duplicate
           [reference setVehicleUUID:refDict[@"vehicleUUID"]];
           [TKParserHelper updateVehiclesForSegmentReference:reference
                                              primaryVehicle:refDict[@"realtimeVehicle"]
-                                        alternativeVehicles:nil];
+                                        alternativeVehicles:refDict[@"realtimeVehicleAlternatives"]];
         }
 
         NSDictionary *bookingData = [self mergedNewBookingData:refDict[@"booking"] into:reference.bookingData];

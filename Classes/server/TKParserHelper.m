@@ -91,13 +91,18 @@
   if (primaryVehicleDict) {
     if (reference.realTimeVehicle) {
       [self updateVehicle:reference.realTimeVehicle fromDictionary:primaryVehicleDict];
-    } else {
+    } else {    
       Vehicle *vehicle = [self insertNewVehicle:primaryVehicleDict inTripKitContext:reference.managedObjectContext];
       reference.realTimeVehicle = vehicle;
     }
   }
   
   if (alternativeVehicleDicts.count > 0) {
+    if (![alternativeVehicleDicts firstObject][@"id"] && reference.realTimeVehicleAlternatives.count) {
+      for (Vehicle *vehicle in reference.realTimeVehicleAlternatives) {
+        vehicle.toDelete = YES;
+      }
+    }
     for (NSDictionary *alternativeVehicleDict in alternativeVehicleDicts) {
       Vehicle *existingVehicle = nil;
       NSString *alternativeIdentifier = alternativeVehicleDict[@"id"];
