@@ -176,7 +176,7 @@ extension SVKRegion {
     
   }
 
-  private func locallyLinkedAccount(mode: String) -> ProviderAuth? {
+  public func locallyLinkedAccount(mode: String) -> ProviderAuth? {
     if let cached = OAuthClient.cachedCredentials(mode: mode) {
       if (cached.isValid || cached.hasRefreshToken) {
         let status = ProviderAuth.Status.Connected(nil)

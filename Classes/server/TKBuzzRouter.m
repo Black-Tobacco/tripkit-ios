@@ -194,6 +194,11 @@
           if (completion) {
               completion(trip, NO);
           }
+        } else {
+            [SGKLog error:error.domain text:error.description];
+            if (completion) {
+                completion(nil, NO);
+            }
         }
     }];
 }

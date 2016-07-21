@@ -96,6 +96,7 @@ enum TKActionType: String {
 struct TKBookingConfirmation {
   struct Detail {
     let title: String
+    let value: String?
     let subtitle: String?
     let imageURL: NSURL?
   }
@@ -227,6 +228,7 @@ extension TKBookingConfirmation.Detail {
           let title = dictionary["title"] as? String else { return nil }
     
     self.title = title
+    self.value = dictionary["value"] as? String
     self.subtitle = dictionary["subtitle"] as? String
     if let imageURLString = dictionary["imageURL"] as? String,
        let imageURL = NSURL(string: imageURLString) {
@@ -344,11 +346,13 @@ extension TKSegment {
   }
 
   private func cacheKey() -> String? {
-    if let path = bookingQuickInternalURL()?.path {
+//    if let path = bookingQuickInternalURL()?.path {
+//    if let path = self.templateHashCode() {
+    let path = String(self.templateHashCode())
       return "\(path)-cached"
-    } else {
-      return nil
-    }
+//    } else {
+//      return nil
+//    }
   }
   
   private func storeQuickBookings(fromArray array: [[NSString: AnyObject]]) {
