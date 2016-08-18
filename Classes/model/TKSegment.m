@@ -9,7 +9,7 @@
 #import "TKSegment.h"
 
 #import "TKTripKit.h"
-
+#import "TKSegment+UMAdditions.h"
 NSString *const UninitializedString =  @"UninitializedString";
 
 @interface TKSegment ()

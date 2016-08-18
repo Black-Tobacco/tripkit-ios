@@ -85,6 +85,13 @@ class TKQuickBooking: NSObject {
   }
 }
 
+
+enum TKActionType: String {
+  case Cancel = "CANCEL"
+  case Call   = "CALL"
+  case Rate   = "RATE"
+}
+
 // Swift-only this would be a struct
 struct TKBookingConfirmation {
   struct Detail {
@@ -98,6 +105,8 @@ struct TKBookingConfirmation {
     let isDestructive: Bool
     let internalURL: NSURL?
     let externalURL: NSURL?
+    let externalAction: NSString?
+    let type: TKActionType?
   }
   
   let status: Detail
@@ -250,7 +259,17 @@ extension TKBookingConfirmation.Action {
     } else {
       self.externalURL = nil
     }
-}
+
+    if let typeRaw = dictionary["type"] as? String {
+      self.type = TKActionType(rawValue: typeRaw)
+    }
+    else {
+      self.type = nil
+    }
+    
+    self.externalAction = dictionary["externalURL"] as? String
+  }
+
 }
 
 
