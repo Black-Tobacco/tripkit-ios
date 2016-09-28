@@ -15,13 +15,21 @@ public final class RegionInformation: NSObject {
   public let supportsConcessionPricing: Bool
   public let hasWheelchairInformation: Bool
   public let paratransitInformation: ParatransitInformation?
+  public let publicTransportOperators: [ModeInfo]?
+  public let bikeSharingProviders: [ModeInfo]?
   
-  private init(transitModes: [ModeInfo], allowsBicyclesOnPublicTransport: Bool, hasWheelchairInformation: Bool, supportsConcessionPricing: Bool, paratransitInformation: ParatransitInformation?) {
+  
+  private init(transitModes: [ModeInfo], allowsBicyclesOnPublicTransport: Bool, hasWheelchairInformation: Bool,
+               supportsConcessionPricing: Bool, paratransitInformation: ParatransitInformation?,
+               publicTransportOperators: [ModeInfo]?, bikeSharingProviders: [ModeInfo]? ) {
+    
     self.publicTransportModes = transitModes
     self.allowsBicyclesOnPublicTransport = allowsBicyclesOnPublicTransport
     self.hasWheelchairInformation = hasWheelchairInformation
     self.supportsConcessionPricing = supportsConcessionPricing
     self.paratransitInformation = paratransitInformation
+    self.publicTransportOperators = publicTransportOperators
+    self.bikeSharingProviders = bikeSharingProviders
   }
   
   private class func fromJSONResponse(response: AnyObject?) -> RegionInformation? {
@@ -31,17 +39,21 @@ public final class RegionInformation: NSObject {
         return nil
     }
     
-    let transitModes = ModeInfo.fromJSONResponse(response)
+    let transitModes = ModeInfo.transitModesFromJSONResponse(response)
     let bicyclesOnTransit = region["allowsBicyclesOnPublicTransport"] as? Bool ?? false
     let wheelies = region["hasWheelchairInformation"] as? Bool ?? false
     let concession = region["supportsConcessionPricing"] as? Bool ?? false
     let para = ParatransitInformation.fromJSONResponse(response)
+    let operators = ModeInfo.publicOperatorsFromJSONResponse(response)
+    let bikeSharingProviders = ModeInfo.bikeSharingProvidersFromJSONResponse(response)
     
     return RegionInformation(transitModes: transitModes,
       allowsBicyclesOnPublicTransport: bicyclesOnTransit,
       hasWheelchairInformation: wheelies,
       supportsConcessionPricing: concession,
-      paratransitInformation: para)
+      paratransitInformation: para,
+      publicTransportOperators: operators,
+      bikeSharingProviders: bikeSharingProviders)
   }
 }
 
@@ -77,17 +89,44 @@ public final class ParatransitInformation: NSObject {
   }
 }
 
+//MARK: ModeInfo parsing
 extension ModeInfo {
-  private class func fromJSONResponse(response: AnyObject?) -> [ModeInfo] {
+  private class func regionFromJSONResponse(response: AnyObject?) -> [String: AnyObject]? {
     guard let JSON = response as? [String: AnyObject],
-          let regions = JSON["regions"] as? [[String: AnyObject]],
-          let region = regions.first,
+      let regions = JSON["regions"] as? [[String: AnyObject]] else {
+        return nil
+    }
+    
+    return regions.first
+  }
+  
+  private class func transitModesFromJSONResponse(response: AnyObject?) -> [ModeInfo] {
+    guard let region = regionFromJSONResponse(response),
           let array = region["transitModes"] as? [[String: AnyObject]] else {
       return []
+    }
+
+    return array.flatMap { ModeInfo(forDictionary: $0) }
+  }
+  
+  private class func publicOperatorsFromJSONResponse(response: AnyObject?) -> [ModeInfo] {
+    guard let region = regionFromJSONResponse(response),
+      let array = region["operators"] as? [[String: AnyObject]] else {
+        return []
     }
     
     return array.flatMap { ModeInfo(forDictionary: $0) }
   }
+  
+  private class func bikeSharingProvidersFromJSONResponse(response: AnyObject?) -> [ModeInfo] {
+    guard let region = regionFromJSONResponse(response),
+      let array = region["bikeShare"] as? [[String: AnyObject]] else {
+        return []
+    }
+    
+    return array.flatMap { ModeInfo(forDictionary: $0) }
+  }
+  
 }
 
 extension TKBuzzInfoProvider {
@@ -130,7 +169,7 @@ extension TKBuzzInfoProvider {
   {
     return fetchRegionInfo(
       region,
-      transformer: ModeInfo.fromJSONResponse,
+      transformer: ModeInfo.transitModesFromJSONResponse,
       completion: completion
     )
   }
