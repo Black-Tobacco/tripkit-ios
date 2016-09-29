@@ -89,12 +89,21 @@ public final class ParatransitInformation: NSObject {
   }
 }
 
+/**
+ Base class for region's information components
+ */
+public class BaseRegionInformation: NSObject {
+  func titleToShow() -> String {
+    fatalError("must be implemented by childs")
+  }
+}
 
 /**
  Informational class for public transport operators. Note that not all the data is
  parsed, as it isn't needed by now.
  */
-public final class PublicOperatorInformation: NSObject {
+public final class PublicOperatorInformation: BaseRegionInformation {
+  
   public let name: String
   
   private init(name: String) {
@@ -107,7 +116,6 @@ public final class PublicOperatorInformation: NSObject {
       return nil
     }
     return PublicOperatorInformation(name: name)
-    
   }
   
   private class func fromJSONArray(jsonArray: AnyObject?) -> [PublicOperatorInformation]? {
@@ -116,6 +124,10 @@ public final class PublicOperatorInformation: NSObject {
     }
     return jsonArray.flatMap { PublicOperatorInformation.fromJsonObject($0) }
   }
+  
+  override func titleToShow() -> String {
+    return self.name
+  }
 }
 
   
@@ -123,7 +135,7 @@ public final class PublicOperatorInformation: NSObject {
  Informational class for public Bike Sharing providers. Note that not all the data is
  parsed, as it isn't needed by now.
  */
-public final class BikeSharingInformation: NSObject {
+public final class BikeSharingInformation: BaseRegionInformation {
   public let title: String
   
   private init(title: String) {
@@ -144,6 +156,10 @@ public final class BikeSharingInformation: NSObject {
       return nil
     }
     return jsonArray.flatMap { BikeSharingInformation.fromJsonObject($0) }
+  }
+  
+  override func titleToShow() -> String {
+    return self.title
   }
   
 }
