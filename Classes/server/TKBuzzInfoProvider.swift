@@ -15,13 +15,13 @@ public final class RegionInformation: NSObject {
   public let supportsConcessionPricing: Bool
   public let hasWheelchairInformation: Bool
   public let paratransitInformation: ParatransitInformation?
-  public let publicTransportOperators: [ModeInfo]?
-  public let bikeSharingProviders: [ModeInfo]?
+  public let publicTransportOperators: [PublicOperatorInformation]?
+  public let bikeSharingProviders: [BikeSharingInformation]?
   
   
   private init(transitModes: [ModeInfo], allowsBicyclesOnPublicTransport: Bool, hasWheelchairInformation: Bool,
                supportsConcessionPricing: Bool, paratransitInformation: ParatransitInformation?,
-               publicTransportOperators: [ModeInfo]?, bikeSharingProviders: [ModeInfo]? ) {
+               publicTransportOperators: [PublicOperatorInformation]?, bikeSharingProviders: [BikeSharingInformation]? ) {
     
     self.publicTransportModes = transitModes
     self.allowsBicyclesOnPublicTransport = allowsBicyclesOnPublicTransport
@@ -44,8 +44,8 @@ public final class RegionInformation: NSObject {
     let wheelies = region["hasWheelchairInformation"] as? Bool ?? false
     let concession = region["supportsConcessionPricing"] as? Bool ?? false
     let para = ParatransitInformation.fromJSONResponse(response)
-    let operators = ModeInfo.publicOperatorsFromJSONResponse(response)
-    let bikeSharingProviders = ModeInfo.bikeSharingProvidersFromJSONResponse(response)
+    let operators = PublicOperatorInformation.fromJSONArray(region["operators"]) ?? []
+    let bikeSharingProviders = BikeSharingInformation.fromJSONArray(region["bikeShare"]) ?? []
     
     return RegionInformation(transitModes: transitModes,
       allowsBicyclesOnPublicTransport: bicyclesOnTransit,
@@ -89,6 +89,66 @@ public final class ParatransitInformation: NSObject {
   }
 }
 
+
+/**
+ Informational class for public transport operators. Note that not all the data is
+ parsed, as it isn't needed by now.
+ */
+public final class PublicOperatorInformation: NSObject {
+  public let name: String
+  
+  private init(name: String) {
+    self.name = name
+  }
+  
+  private class func fromJsonObject(jsonObject: [String: AnyObject?]?) -> PublicOperatorInformation? {
+    guard let jsonObject = jsonObject,
+              name = jsonObject["name"] as? String else {
+      return nil
+    }
+    return PublicOperatorInformation(name: name)
+    
+  }
+  
+  private class func fromJSONArray(jsonArray: AnyObject?) -> [PublicOperatorInformation]? {
+    guard let jsonArray = jsonArray as? [[String: AnyObject]] else {
+        return nil
+    }
+    return jsonArray.flatMap { PublicOperatorInformation.fromJsonObject($0) }
+  }
+}
+
+  
+/**
+ Informational class for public Bike Sharing providers. Note that not all the data is
+ parsed, as it isn't needed by now.
+ */
+public final class BikeSharingInformation: NSObject {
+  public let title: String
+  
+  private init(title: String) {
+    self.title = title
+  }
+  
+  private class func fromJsonObject(jsonObject: [String: AnyObject?]?) -> BikeSharingInformation? {
+    guard let jsonObject = jsonObject,
+      title = jsonObject["title"] as? String else {
+        return nil
+    }
+    return BikeSharingInformation(title: title)
+    
+  }
+  
+  private class func fromJSONArray(jsonArray: AnyObject?) -> [BikeSharingInformation]? {
+    guard let jsonArray = jsonArray as? [[String: AnyObject]] else {
+      return nil
+    }
+    return jsonArray.flatMap { BikeSharingInformation.fromJsonObject($0) }
+  }
+  
+}
+
+
 //MARK: ModeInfo parsing
 extension ModeInfo {
   private class func regionFromJSONResponse(response: AnyObject?) -> [String: AnyObject]? {
@@ -108,25 +168,7 @@ extension ModeInfo {
 
     return array.flatMap { ModeInfo(forDictionary: $0) }
   }
-  
-  private class func publicOperatorsFromJSONResponse(response: AnyObject?) -> [ModeInfo] {
-    guard let region = regionFromJSONResponse(response),
-      let array = region["operators"] as? [[String: AnyObject]] else {
-        return []
-    }
-    
-    return array.flatMap { ModeInfo(forDictionary: $0) }
-  }
-  
-  private class func bikeSharingProvidersFromJSONResponse(response: AnyObject?) -> [ModeInfo] {
-    guard let region = regionFromJSONResponse(response),
-      let array = region["bikeShare"] as? [[String: AnyObject]] else {
-        return []
-    }
-    
-    return array.flatMap { ModeInfo(forDictionary: $0) }
-  }
-  
+
 }
 
 extension TKBuzzInfoProvider {
