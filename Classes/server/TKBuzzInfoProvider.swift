@@ -105,17 +105,23 @@ public class BaseRegionInformation: NSObject {
 public final class PublicOperatorInformation: BaseRegionInformation {
   
   public let name: String
+  public let types: [PublicOperatorType]
   
-  private init(name: String) {
+  private init(name: String, types: [PublicOperatorType]) {
     self.name = name
+    self.types = types
   }
   
   private class func fromJsonObject(jsonObject: [String: AnyObject?]?) -> PublicOperatorInformation? {
+   
     guard let jsonObject = jsonObject,
-              name = jsonObject["name"] as? String else {
+              name = jsonObject["name"] as? String,
+              typesArray = jsonObject["types"] as? [[String: AnyObject?]],
+              types = PublicOperatorType.fromJSONArray(typesArray) else {
       return nil
     }
-    return PublicOperatorInformation(name: name)
+    
+    return PublicOperatorInformation(name: name, types: types)
   }
   
   private class func fromJSONArray(jsonArray: AnyObject?) -> [PublicOperatorInformation]? {
@@ -128,6 +134,35 @@ public final class PublicOperatorInformation: BaseRegionInformation {
   override func titleToShow() -> String {
     return self.name
   }
+}
+
+/**
+ Informational class for public transport operator types. A type could be for example
+ "bus", "tram" etc
+*/
+public final class PublicOperatorType {
+  var modeIdentifier: String?
+  var localIcon: String?
+  
+  init(modeIdentifier: String?, localIcon: String?) {
+    self.modeIdentifier = modeIdentifier
+    self.localIcon = localIcon
+  }
+  
+  private class func fromJSONObject(jsonObject: [String: AnyObject?]?) -> PublicOperatorType? {
+    guard let json = jsonObject else {
+      return nil
+    }
+    return PublicOperatorType(modeIdentifier: json["identifier"] as? String, localIcon: json["localIcon"] as? String)
+  }
+  
+  private class func fromJSONArray(jsonArray: [[String: AnyObject?]]?) -> [PublicOperatorType]? {
+    guard let jsonArray = jsonArray else {
+      return nil
+    }
+    return jsonArray.flatMap {PublicOperatorType.fromJSONObject($0)}
+  }
+  
 }
 
   
