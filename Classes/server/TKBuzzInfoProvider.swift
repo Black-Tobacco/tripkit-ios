@@ -93,9 +93,19 @@ public final class ParatransitInformation: NSObject {
  Base class for region's information components
  */
 public class BaseRegionInformation: NSObject {
+  
   func titleToShow() -> String {
     fatalError("must be implemented by childs")
   }
+  
+  func modeIdentifier() -> String? {
+    fatalError("must be implemented by childs")
+  }
+  
+  func colorTint() -> UIColor? {
+    fatalError("must be implemented by childs")
+  }
+  
 }
 
 /**
@@ -112,11 +122,25 @@ public final class PublicOperatorInformation: BaseRegionInformation {
     self.types = types
   }
   
+  //BaseRegionInformation Overrides
+  override func modeIdentifier() -> String? {
+    guard let firstType = types.first else {
+      return nil
+    }
+    return firstType.modeIdentifier
+  }
+  
+  override func colorTint() -> UIColor? {
+    return nil
+  }
+  //[END]BaseRegionInformation Overrides[END]
+  
+  
   private class func fromJsonObject(jsonObject: [String: AnyObject?]?) -> PublicOperatorInformation? {
    
     guard let jsonObject = jsonObject,
               name = jsonObject["name"] as? String,
-              typesArray = jsonObject["types"] as? [[String: AnyObject?]],
+              typesArray = jsonObject["types"] as? [[String: AnyObject]],
               types = PublicOperatorType.fromJSONArray(typesArray) else {
       return nil
     }
@@ -136,6 +160,7 @@ public final class PublicOperatorInformation: BaseRegionInformation {
   }
 }
 
+
 /**
  Informational class for public transport operator types. A type could be for example
  "bus", "tram" etc
@@ -149,14 +174,14 @@ public final class PublicOperatorType {
     self.localIcon = localIcon
   }
   
-  private class func fromJSONObject(jsonObject: [String: AnyObject?]?) -> PublicOperatorType? {
+  private class func fromJSONObject(jsonObject: [String: AnyObject]?) -> PublicOperatorType? {
     guard let json = jsonObject else {
       return nil
     }
     return PublicOperatorType(modeIdentifier: json["identifier"] as? String, localIcon: json["localIcon"] as? String)
   }
   
-  private class func fromJSONArray(jsonArray: [[String: AnyObject?]]?) -> [PublicOperatorType]? {
+  private class func fromJSONArray(jsonArray: [[String: AnyObject]]?) -> [PublicOperatorType]? {
     guard let jsonArray = jsonArray else {
       return nil
     }
@@ -171,18 +196,41 @@ public final class PublicOperatorType {
  parsed, as it isn't needed by now.
  */
 public final class BikeSharingInformation: BaseRegionInformation {
-  public let title: String
   
-  private init(title: String) {
+  let title: String
+  let color: UIColor?
+  
+  private init(title: String, color: UIColor?) {
     self.title = title
+    self.color = color
   }
+  
+  //BaseRegionInformation Overrides
+  override func modeIdentifier() -> String? {
+    return VEHICLE_MODE_SHARED_BIKE
+  }
+  
+  override func colorTint() -> UIColor? {
+    return color
+  }
+  //[END]BaseRegionInformation Overrides[END]
   
   private class func fromJsonObject(jsonObject: [String: AnyObject?]?) -> BikeSharingInformation? {
     guard let jsonObject = jsonObject,
       title = jsonObject["title"] as? String else {
         return nil
     }
-    return BikeSharingInformation(title: title)
+    
+    var color: UIColor? = nil
+    if let  colorJson = jsonObject["color"] as? [String: AnyObject],
+            red = colorJson["red"] as? CGFloat,
+            green = colorJson["green"] as? CGFloat,
+            blue = colorJson["blue"] as? CGFloat {
+  
+      color = UIColor(red: red/255, green: green/255, blue: blue/255, alpha: 1)
+    }
+
+    return BikeSharingInformation(title: title, color: color)
     
   }
   
