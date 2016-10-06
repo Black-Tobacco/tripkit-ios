@@ -94,6 +94,12 @@ public final class ParatransitInformation: NSObject {
  */
 public class BaseRegionInformation: NSObject {
   
+  let icon: String?
+  
+  init(icon: String?) {
+    self.icon = icon
+  }
+  
   func titleToShow() -> String {
     fatalError("must be implemented by childs")
   }
@@ -117,9 +123,10 @@ public final class PublicOperatorInformation: BaseRegionInformation {
   public let name: String
   public let types: [PublicOperatorType]
   
-  private init(name: String, types: [PublicOperatorType]) {
+  private init(name: String, types: [PublicOperatorType], icon: String?) {
     self.name = name
     self.types = types
+    super.init(icon: icon)
   }
   
   //BaseRegionInformation Overrides
@@ -145,7 +152,9 @@ public final class PublicOperatorInformation: BaseRegionInformation {
       return nil
     }
     
-    return PublicOperatorInformation(name: name, types: types)
+    let icon = jsonObject["icon"] as? String
+    
+    return PublicOperatorInformation(name: name, types: types, icon: icon)
   }
   
   private class func fromJSONArray(jsonArray: AnyObject?) -> [PublicOperatorInformation]? {
@@ -200,9 +209,10 @@ public final class BikeSharingInformation: BaseRegionInformation {
   let title: String
   let color: UIColor?
   
-  private init(title: String, color: UIColor?) {
+  private init(title: String, color: UIColor?, icon: String?) {
     self.title = title
     self.color = color
+    super.init(icon: icon)
   }
   
   //BaseRegionInformation Overrides
@@ -230,7 +240,9 @@ public final class BikeSharingInformation: BaseRegionInformation {
       color = UIColor(red: red/255, green: green/255, blue: blue/255, alpha: 1)
     }
 
-    return BikeSharingInformation(title: title, color: color)
+    let icon = jsonObject["icon"] as? String
+    
+    return BikeSharingInformation(title: title, color: color, icon: icon)
     
   }
   
