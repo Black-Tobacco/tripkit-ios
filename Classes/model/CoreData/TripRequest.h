@@ -42,6 +42,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSDate *time;
 @property (nonatomic, weak, nullable) TripRequest *replacement;
 @property (nonatomic, assign) TripGroupVisibility defaultVisibility;
+@property (nonatomic, strong) NSArray<NSString *> *minimisedPTOperators;
+@property (nonatomic, strong) NSArray<NSString *> *minimisedBikeSharers;
 
 + (TripRequest *)insertRequestIntoTripKitContext:(NSManagedObjectContext *)context;
 

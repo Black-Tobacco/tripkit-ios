@@ -34,6 +34,7 @@ typedef NSUInteger SGSegmentTemplateFlag;
 @dynamic smsMessage, smsNumber;
 @dynamic segmentType;
 @dynamic notesRaw;
+@dynamic operatorName;
 @dynamic visibility;
 @dynamic startLocation, endLocation;
 @dynamic toDelete;

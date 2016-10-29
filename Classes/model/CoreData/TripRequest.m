@@ -31,6 +31,8 @@
 @synthesize requestedModes;
 @synthesize replacement;
 @synthesize defaultVisibility;
+@synthesize minimisedPTOperators;
+@synthesize minimisedBikeSharers;
 
 - (void)remove {
   self.toDelete = YES;
@@ -275,6 +277,12 @@
     } else {
       group.visibility = TripGroupVisibilityFull;
     }
+      
+    NSSet<NSString *> *setMinimisedPTOperators = [NSSet setWithArray:self.minimisedPTOperators];
+    NSSet<NSString *> *setMinimisedBikeSharers = [NSSet setWithArray:self.minimisedBikeSharers];
+
+//FIXME: This method should be inside the SDK not outside
+    [group adjustVisibilityForMinimizedProviders:setMinimisedPTOperators minimisedBikeSharers:setMinimisedBikeSharers];  
   }
   
   NSArray *sorters = [self sortDescriptorsAccordingToSelectedOrder];

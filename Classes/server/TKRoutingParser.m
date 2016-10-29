@@ -52,10 +52,14 @@
   template.smsNumber        = dict[@"smsNumber"];
   template.durationWithoutTraffic = dict[@"durationWithoutTraffic"];
   
+  if (dict[@"serviceOperator"]) {
+    template.operatorName    = dict[@"serviceOperator"];
+    service.operatorName     = dict[@"serviceOperator"];
+  }
+    
   if (template.segmentType.integerValue == BHSegmentTypeScheduled) {
     template.scheduledStartStopCode = dict[@"stopCode"];
     template.scheduledEndStopCode   = dict[@"endStopCode"];
-    service.operatorName            = dict[@"serviceOperator"];
   }
   
   // additional info
@@ -473,7 +477,7 @@ allowDuplicatingExistingTrip:YES]; // we don't actually create a duplicate
           service.frequency = refDict[@"frequency"]         ?: service.frequency;
           service.lineName  = refDict[@"serviceName"]       ?: service.lineName;
           service.direction = refDict[@"serviceDirection"]  ?: service.direction;
-          service.number		= refDict[@"serviceNumber"]     ?: service.number;
+          service.number	= refDict[@"serviceNumber"]     ?: service.number;
           reference.service = service;
           
           reference.ticketWebsiteURLString = refDict[@"ticketWebsiteURL"];

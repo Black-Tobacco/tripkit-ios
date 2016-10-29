@@ -18,6 +18,24 @@ public final class RegionInformation: NSObject {
   public let publicTransportOperators: [PublicOperatorInformation]?
   public let bikeSharingProviders: [BikeSharingInformation]?
   
+  public var orderedPTOperators: [PublicOperatorInformation]? {
+    return publicTransportOperators?.sort({ (pt1, pt2) -> Bool in
+      if let mode1 = pt1.modeIdentifier(), mode2 = pt2.modeIdentifier() where mode1 != mode2 {
+        return mode2 > mode1
+      }
+      else {
+        return pt2.name > pt1.name
+      }
+    })
+  }
+  
+  public var orderedBikeSharingProvider: [BikeSharingInformation]? {
+    return bikeSharingProviders?.sort({ (bp1, bp2) -> Bool in
+      
+      return bp2.title > bp1.title
+      
+    })
+  }
   
   private init(transitModes: [ModeInfo], allowsBicyclesOnPublicTransport: Bool, hasWheelchairInformation: Bool,
                supportsConcessionPricing: Bool, paratransitInformation: ParatransitInformation?,
@@ -95,9 +113,11 @@ public final class ParatransitInformation: NSObject {
 public class BaseRegionInformation: NSObject {
   
   let icon: String?
-  
-  init(icon: String?) {
+  var visibility: TripGroupVisibility
+
+  init(icon: String?, visibility: TripGroupVisibility = TripGroupVisibilityFull) {
     self.icon = icon
+    self.visibility = visibility
   }
   
   func titleToShow() -> String {
@@ -112,6 +132,10 @@ public class BaseRegionInformation: NSObject {
     fatalError("must be implemented by childs")
   }
   
+  func localSharedKey() -> String {
+    fatalError("must be implemented by childs")
+  }
+  
 }
 
 /**
@@ -123,9 +147,12 @@ public final class PublicOperatorInformation: BaseRegionInformation {
   public let name: String
   public let types: [PublicOperatorType]
   
-  private init(name: String, types: [PublicOperatorType], icon: String?) {
+  private init(name: String, types: [PublicOperatorType]) {
     self.name = name
     self.types = types
+    
+    let icon = types.first?.remoteIcon
+    
     super.init(icon: icon)
   }
   
@@ -140,6 +167,16 @@ public final class PublicOperatorInformation: BaseRegionInformation {
   override func colorTint() -> UIColor? {
     return nil
   }
+  
+  override func titleToShow() -> String {
+    return self.name
+  }
+  
+  override func localSharedKey() -> String {
+    let key = self.name.stringByReplacingOccurrencesOfString(" ", withString: "_").lowercaseString
+    NSLog("PUBLIC TRANSPORT: localSharedKey: %@", key)
+    return key
+  }
   //[END]BaseRegionInformation Overrides[END]
   
   
@@ -152,9 +189,7 @@ public final class PublicOperatorInformation: BaseRegionInformation {
       return nil
     }
     
-    let icon = jsonObject["icon"] as? String
-    
-    return PublicOperatorInformation(name: name, types: types, icon: icon)
+    return PublicOperatorInformation(name: name, types: types)
   }
   
   private class func fromJSONArray(jsonArray: AnyObject?) -> [PublicOperatorInformation]? {
@@ -164,9 +199,7 @@ public final class PublicOperatorInformation: BaseRegionInformation {
     return jsonArray.flatMap { PublicOperatorInformation.fromJsonObject($0) }
   }
   
-  override func titleToShow() -> String {
-    return self.name
-  }
+
 }
 
 
@@ -177,17 +210,21 @@ public final class PublicOperatorInformation: BaseRegionInformation {
 public final class PublicOperatorType {
   var modeIdentifier: String?
   var localIcon: String?
+  var remoteIcon: String?
   
-  init(modeIdentifier: String?, localIcon: String?) {
+  init(modeIdentifier: String?, localIcon: String?, remoteIcon: String?) {
     self.modeIdentifier = modeIdentifier
     self.localIcon = localIcon
+    self.remoteIcon = remoteIcon
   }
   
   private class func fromJSONObject(jsonObject: [String: AnyObject]?) -> PublicOperatorType? {
     guard let json = jsonObject else {
       return nil
     }
-    return PublicOperatorType(modeIdentifier: json["identifier"] as? String, localIcon: json["localIcon"] as? String)
+    return PublicOperatorType(modeIdentifier: json["identifier"] as? String,
+                              localIcon: json["localIcon"] as? String,
+                              remoteIcon: json["remoteIcon"] as? String)
   }
   
   private class func fromJSONArray(jsonArray: [[String: AnyObject]]?) -> [PublicOperatorType]? {
@@ -222,6 +259,12 @@ public final class BikeSharingInformation: BaseRegionInformation {
   
   override func colorTint() -> UIColor? {
     return color
+  }
+  
+  override func localSharedKey() -> String {
+    let key = self.title.stringByReplacingOccurrencesOfString(" ", withString: "_").lowercaseString
+    NSLog("BIKE: localSharedKey: %@", key)
+    return key
   }
   //[END]BaseRegionInformation Overrides[END]
   

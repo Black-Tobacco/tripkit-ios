@@ -15,7 +15,7 @@
 #import <MapKit/MapKit.h>
 
 #define kBHSegmentModeContinuation  @"[cont]"
-#define kBHSegmentModeParking				@"parking"
+#define kBHSegmentModeParking		@"parking"
 #define kBHSegmentModePlane         @"aeroplane"
 
 @class SegmentReference, Shape;
@@ -31,6 +31,7 @@
 @property (nonatomic, strong) id endLocation;
 @property (nonatomic, strong) NSString * modeIdentifier;
 @property (nonatomic, strong) NSString * notesRaw;
+@property (nonatomic, strong) NSString * operatorName;
 @property (nonatomic, strong) NSString * scheduledStartStopCode;
 @property (nonatomic, strong) NSString * scheduledEndStopCode;
 @property (nonatomic, strong) NSString * smsMessage;
