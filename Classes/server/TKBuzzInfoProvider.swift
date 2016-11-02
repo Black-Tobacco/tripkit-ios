@@ -224,7 +224,7 @@ public final class PublicOperatorType {
     }
     return PublicOperatorType(modeIdentifier: json["identifier"] as? String,
                               localIcon: json["localIcon"] as? String,
-                              remoteIcon: json["remoteIcon"] as? String)
+                              remoteIcon: json["operatorRemoteIcon"] as? String)
   }
   
   private class func fromJSONArray(jsonArray: [[String: AnyObject]]?) -> [PublicOperatorType]? {
