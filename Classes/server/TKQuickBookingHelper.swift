@@ -30,6 +30,9 @@ class TKQuickBooking: NSObject {
   /// Localised description
   let subtitle: String?
   
+  //Identifier code for this booking option
+  let productID: String?
+  
   /// URL to book this option. If possible, this will book it without further confirmation. These URLs are meant to be used with an instance of `BPKBookingViewController`.
   let bookingURL: NSURL
 
@@ -63,9 +66,10 @@ class TKQuickBooking: NSObject {
   /// Expected waiting time. Negative if unknown. (For Obj-c compatibility.)
   let ETARaw: NSTimeInterval
   
-  private init(title: String, subtitle: String?, bookingURL: NSURL, bookingTitle: String, secondaryBookingURL: NSURL?, secondaryBookingTitle: String?, tripUpdateURL: NSURL?, imageURL: NSURL?, price: TKQuickBookingPrice?, priceString: String?, surgeText: String?, surgeImageURL: NSURL?, ETA: NSTimeInterval?) {
+  private init(title: String, subtitle: String?, productID: String?, bookingURL: NSURL, bookingTitle: String, secondaryBookingURL: NSURL?, secondaryBookingTitle: String?, tripUpdateURL: NSURL?, imageURL: NSURL?, price: TKQuickBookingPrice?, priceString: String?, surgeText: String?, surgeImageURL: NSURL?, ETA: NSTimeInterval?) {
     self.title = title
     self.subtitle = subtitle
+    self.productID = productID
     self.bookingURL = bookingURL
     self.bookingTitle = bookingTitle
     self.secondaryBookingURL = secondaryBookingURL
@@ -161,6 +165,8 @@ extension TKQuickBooking {
     }
     
     let subtitle = dictionary["subtitle"] as? String
+    let productID = dictionary["productID"] as? String
+    
     let imageURL: NSURL?
     if let URLString = dictionary["imageURL"] as? String, URL = NSURL(string: URLString) {
       imageURL = URL
@@ -190,7 +196,7 @@ extension TKQuickBooking {
     let tripUpdateURLString = dictionary["tripUpdateURL"] as? String
     let tripUpdateURL = tripUpdateURLString != nil ? NSURL(string: tripUpdateURLString!) : nil
     
-    self.init(title: title, subtitle: subtitle,
+    self.init(title: title, subtitle: subtitle, productID: productID,
               bookingURL: bookingURL, bookingTitle: bookingTitle,
               secondaryBookingURL: secondaryBookingURL, secondaryBookingTitle: secondaryBookingTitle,
               tripUpdateURL: tripUpdateURL,
